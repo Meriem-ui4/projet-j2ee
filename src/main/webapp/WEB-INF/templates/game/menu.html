@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menu — Memory Game</title>
+  <th:block th:replace="~{fragments/styles :: styles}"></th:block>
+</head>
+<body class="theme1">
+  <div class="stars-layer"></div>
+
+  <div class="page-wrap">
+
+    <!-- ── Navbar ────────────────────────────────────────── -->
+    <nav class="navbar">
+      <span class="nav-logo">✦ MEMORY GAME</span>
+      <div class="nav-links">
+        <a th:href="@{/game/leaderboard}" class="nav-link">Classement</a>
+        <span class="nav-user" th:text="'Bonjour, ' + ${player?.username} + ' ✦'">Joueur</span>
+        <a th:href="@{/logout}" class="nav-link danger">Déconnexion</a>
+      </div>
+    </nav>
+
+    <main class="menu-page">
+
+      <!-- ── En-tête ──────────────────────────────────── -->
+      <div class="menu-header">
+        <h1 class="menu-title">MEMORY GAME</h1>
+        <p class="menu-sub">Choisissez un thème et un niveau pour commencer</p>
+      </div>
+
+      <!-- ── Stats du joueur ──────────────────────────── -->
+      <div class="stats-row" th:if="${player}">
+        <div class="stat-box">
+          <div class="stat-value" th:text="${player.bestScore}">0</div>
+          <div class="stat-label">Meilleur score</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" th:text="${player.totalGames}">0</div>
+          <div class="stat-label">Parties jouées</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Thèmes</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Niveaux</div>
+        </div>
+      </div>
+
+      <!-- ── Bandeau "Reprendre" ───────────────────────── -->
+      <div class="save-banner" th:if="${hasSave}">
+        <div>
+          <div class="save-banner-title">✦ Partie en cours sauvegardée</div>
+          <div class="save-banner-sub">Continuez là où vous vous êtes arrêté</div>
+        </div>
+        <a th:href="@{/game/resume}" class="btn btn-primary">Reprendre →</a>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           SÉLECTION DU THÈME
+      ══════════════════════════════════════════════════ -->
+      <div class="theme-section">
+        <p class="theme-section-title">① Choisissez un thème</p>
+        <div class="themes-grid">
+
+          <div class="theme-card selected" data-theme="theme1" onclick="selectTheme('theme1')">
+            <img th:src="@{/backgrounds/theme1.jpg}" class="theme-preview-img" alt="Princesse"/>
+            <div class="theme-label">Princesse</div>
+          </div>
+
+          <div class="theme-card" data-theme="theme2" onclick="selectTheme('theme2')">
+            <img th:src="@{/backgrounds/theme2.jpg}" class="theme-preview-img" alt="Animaux"/>
+            <div class="theme-label">Animaux</div>
+          </div>
+
+          <div class="theme-card" data-theme="theme3" onclick="selectTheme('theme3')">
+            <img th:src="@{/backgrounds/theme3.jpg}" class="theme-preview-img" alt="Chiffres"/>
+            <div class="theme-label">Chiffres</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           SÉLECTION DU NIVEAU
+      ══════════════════════════════════════════════════ -->
+      <p class="levels-section-title">② Choisissez un niveau</p>
+      <div class="levels-grid">
+
+        <a class="level-card easy" id="link-1" th:href="@{/game/start/1(theme='theme1')}">
+          <span class="level-icon">🌿</span>
+          <div class="level-name">FACILE</div>
+          <div class="level-info">Grille 4 × 4 &nbsp;·&nbsp; 8 paires &nbsp;·&nbsp; 2 minutes</div>
+          <span class="level-badge badge-easy">Débutant</span>
+        </a>
+
+        <a class="level-card medium" id="link-2" th:href="@{/game/start/2(theme='theme1')}">
+          <span class="level-icon">🌙</span>
+          <div class="level-name">MOYEN</div>
+          <div class="level-info">Grille 5 × 4 &nbsp;·&nbsp; 10 paires &nbsp;·&nbsp; 90 secondes</div>
+          <span class="level-badge badge-medium">Intermédiaire</span>
+        </a>
+
+        <a class="level-card hard" id="link-3" th:href="@{/game/start/3(theme='theme1')}">
+          <span class="level-icon">☄️</span>
+          <div class="level-name">DIFFICILE</div>
+          <div class="level-info">Grille 6 × 4 &nbsp;·&nbsp; 12 paires &nbsp;·&nbsp; 60 secondes</div>
+          <span class="level-badge badge-hard">Expert</span>
+        </a>
+
+      </div>
+
+      <!-- ── Mini classement ───────────────────────────── -->
+      <div class="glass-card" th:if="${leaderboard != null and !#lists.isEmpty(leaderboard)}">
+        <div class="lb-section-title">🏆 TOP SCORES</div>
+        <table class="lb-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">#</th>
+              <th>Niveau</th>
+              <th>Thème</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="s, iter : ${leaderboard}" th:if="${iter.index < 5}">
+              <td>
+                <span class="lb-rank"
+                      th:classappend="${iter.index == 0} ? ' gold'
+                                    : (${iter.index == 1} ? ' silver'
+                                    : (${iter.index == 2} ? ' bronze' : ''))"
+                      th:text="${iter.index + 1}">1</span>
+              </td>
+              <td>
+                <span th:if="${s.level == 1}" class="level-badge badge-easy">Facile</span>
+                <span th:if="${s.level == 2}" class="level-badge badge-medium">Moyen</span>
+                <span th:if="${s.level == 3}" class="level-badge badge-hard">Difficile</span>
+              </td>
+              <td>
+                <span class="theme-badge" th:text="${themeNames[s.theme]}">Thème</span>
+              </td>
+              <td class="lb-score" th:text="${s.score}">0</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="text-align:right;margin-top:1rem;">
+          <a th:href="@{/game/leaderboard}" class="btn btn-secondary btn-sm">Voir tout →</a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <th:block th:replace="~{fragments/scripts :: scripts}"></th:block>
+  <script>
+    // Thème sélectionné par défaut
+    let currentTheme = 'theme1';
+
+    // Récupérer le context path via Thymeleaf
+    const CTX = /*[[@{/}]]*/ '/';
+
+    function setThemeBackground(theme) {
+      document.body.className = theme;
+      document.body.style.setProperty('--theme-bg', `url(${CTX}backgrounds/${theme}.jpg)`);
+    }
+
+    function selectTheme(theme) {
+      currentTheme = theme;
+
+      // Mettre à jour les cartes de thème
+      document.querySelectorAll('.theme-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.theme === theme);
+      });
+
+      // Changer le background
+      setThemeBackground(theme);
+
+      // Mettre à jour les liens des niveaux
+      ['1','2','3'].forEach(lvl => {
+        const link = document.getElementById('link-' + lvl);
+        if (link) {
+          link.href = `${CTX}game/start/${lvl}?theme=${theme}`;
+        }
+      });
+    }
+
+    // Initialiser le background au chargement
+    setThemeBackground(currentTheme);
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  Fragment Thymeleaf : inclusion de la feuille de style principale.
+  Utilise dans toutes les pages via th:replace="~{fragments/styles :: styles}".
+  Le fichier game.css est servi directement par Tomcat depuis webapp/css/.
+-->
+<th:block th:fragment="styles">
+  <link rel="stylesheet" th:href="@{/css/game.css}"/>
+</th:block>
+</html>

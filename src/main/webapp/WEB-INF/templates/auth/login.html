@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Connexion — Memory Game</title>
+  <th:block th:replace="~{fragments/styles :: styles}"></th:block>
+</head>
+<body>
+  <div class="stars-layer"></div>
+
+  <div class="page-wrap">
+    <div class="auth-page">
+      <div class="auth-box">
+        <div class="glass-card">
+
+          <span class="auth-logo">🎴</span>
+
+          <h1 class="auth-title">CONNEXION</h1>
+          <p class="auth-subtitle">Entrez et retrouvez les paires cachées</p>
+
+          <!-- Succès inscription -->
+          <div th:if="${param.registered}" class="form-success">
+            Compte créé avec succès ! Connectez-vous.
+          </div>
+
+          <!-- Succès déconnexion -->
+          <div th:if="${param.logout}" class="form-success"
+               style="background:rgba(138,179,212,0.1);border-color:rgba(138,179,212,0.3);color:var(--accent-silver);">
+            Vous avez été déconnecté.
+          </div>
+
+          <!-- Erreur -->
+          <div th:if="${error}" class="form-error" th:text="${error}"></div>
+
+          <!-- Formulaire de connexion -->
+          <form method="post" th:action="@{/login}" autocomplete="on">
+
+            <input type="hidden" name="csrf" th:value="${csrf}"/>
+
+            <div class="form-group">
+              <label class="form-label" for="username">Nom d'utilisateur ou Email</label>
+              <input id="username" name="username" type="text"
+                     class="form-input"
+                     placeholder="pseudo ou adresse email"
+                     required autocomplete="username"
+                     minlength="3" maxlength="100"/>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="password">Mot de passe</label>
+              <input id="password" name="password" type="password"
+                     class="form-input"
+                     placeholder="••••••••"
+                     required autocomplete="current-password"
+                     minlength="6"/>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg"
+                    style="width:100%;margin-top:0.75rem;">
+              Entrer ✦
+            </button>
+          </form>
+
+          <hr class="auth-divider"/>
+
+          <div class="auth-footer">
+            Pas encore de compte ?
+            <a th:href="@{/register}">Créer un compte</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <th:block th:replace="~{fragments/scripts :: scripts}"></th:block>
+</body>
+</html>

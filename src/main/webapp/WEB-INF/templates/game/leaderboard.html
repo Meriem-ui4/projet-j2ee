@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Classement — Memory Game</title>
+  <th:block th:replace="~{fragments/styles :: styles}"></th:block>
+</head>
+<body>
+  <div class="stars-layer"></div>
+
+  <div class="page-wrap">
+
+    <!-- ── Navbar ──────────────────────────────────────────── -->
+    <nav class="navbar">
+      <a th:href="@{/game/accueil}" class="nav-logo">✦ MEMORY GAME</a>
+      <div class="nav-links">
+        <a th:href="@{/game/accueil}" class="nav-link">← Menu</a>
+        <a th:if="${isLoggedIn}" th:href="@{/logout}" class="nav-link danger">Déconnexion</a>
+      </div>
+    </nav>
+
+    <main class="leaderboard-page">
+
+      <h1 class="lb-title">🏆 CLASSEMENT</h1>
+
+      <div class="glass-card">
+        <table class="lb-table">
+          <thead>
+            <tr>
+              <th style="width:55px;">#</th>
+              <th>Niveau</th>
+              <th>Thème</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="s, iter : ${scores}">
+              <td>
+                <span class="lb-rank"
+                      th:classappend="${iter.index == 0} ? ' gold'
+                                    : (${iter.index == 1} ? ' silver'
+                                    : (${iter.index == 2} ? ' bronze' : ''))"
+                      th:text="${iter.index + 1}">1</span>
+              </td>
+              <td>
+                <span th:if="${iter.index == 0}" style="font-size:0.95rem;">🥇 </span>
+                <span th:if="${iter.index == 1}" style="font-size:0.95rem;">🥈 </span>
+                <span th:if="${iter.index == 2}" style="font-size:0.95rem;">🥉 </span>
+                <span th:if="${s.level == 1}" class="level-badge badge-easy">Facile</span>
+                <span th:if="${s.level == 2}" class="level-badge badge-medium">Moyen</span>
+                <span th:if="${s.level == 3}" class="level-badge badge-hard">Difficile</span>
+              </td>
+              <td>
+                <span class="theme-badge" th:text="${themeNames[s.theme]}">Thème</span>
+              </td>
+              <td class="lb-score" th:text="${s.score}">0</td>
+            </tr>
+
+            <!-- Table vide -->
+            <tr th:if="${#lists.isEmpty(scores)}">
+              <td colspan="4" class="lb-empty">
+                Aucun score pour l'instant. Soyez le premier !
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="text-align:center;margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a th:href="@{/game/accueil}" class="btn btn-primary">Jouer maintenant ✦</a>
+        <a th:href="@{/game/accueil}" class="btn btn-secondary">← Menu</a>
+      </div>
+
+    </main>
+  </div>
+
+  <th:block th:replace="~{fragments/scripts :: scripts}"></th:block>
+</body>
+</html>

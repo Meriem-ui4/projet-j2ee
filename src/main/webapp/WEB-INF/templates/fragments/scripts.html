@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  Fragment Thymeleaf : inclusion du fichier JavaScript principal.
+  Utilise dans toutes les pages via th:replace="~{fragments/scripts :: scripts}".
+  Le fichier game.js est servi directement par Tomcat depuis webapp/js/.
+-->
+<th:block th:fragment="scripts">
+  <script th:src="@{/js/game.js}"></script>
+</th:block>
+</html>

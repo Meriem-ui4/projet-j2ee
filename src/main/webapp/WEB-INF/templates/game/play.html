@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${config['name']} + ' — Memory Game'">Jeu</title>
+  <th:block th:replace="~{fragments/styles :: styles}"></th:block>
+</head>
+<body th:class="${theme}"
+      th:style="'--theme-bg: url(' + @{/backgrounds/} + ${theme} + '.jpg)'">
+  <div class="stars-layer"></div>
+
+  <div class="page-wrap game-page">
+
+    <!-- ════════════════════════════════════
+         HUD — barre de jeu en haut
+    ════════════════════════════════════ -->
+    <header class="game-header">
+
+      <div class="hud">
+
+        <div class="hud-item">
+          <div class="hud-val" id="hud-score">0</div>
+          <div class="hud-lbl">Score</div>
+        </div>
+
+        <div class="hud-item">
+          <div class="hud-val" id="hud-pairs">0/0</div>
+          <div class="hud-lbl">Paires</div>
+        </div>
+
+        <div class="hud-item">
+          <div class="hud-val" id="hud-moves">0</div>
+          <div class="hud-lbl">Coups</div>
+        </div>
+
+        <div class="hud-item hud-timer" id="hud-timer-wrap">
+          <div class="hud-val" id="hud-timer">0:00</div>
+          <div class="hud-lbl">Temps restant</div>
+        </div>
+
+        <!-- Badge niveau -->
+        <div>
+          <span th:if="${level == 1}" class="level-badge badge-easy">Facile</span>
+          <span th:if="${level == 2}" class="level-badge badge-medium">Moyen</span>
+          <span th:if="${level == 3}" class="level-badge badge-hard">Difficile</span>
+        </div>
+
+        <!-- Badge thème -->
+        <div>
+          <span class="theme-badge" th:text="${themeName}">Thème</span>
+        </div>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="game-actions">
+        <button id="btn-pause" class="btn btn-secondary btn-sm">Pause</button>
+        <button id="btn-save"  class="btn btn-primary btn-sm">Sauvegarder ✦</button>
+        <a th:href="@{/game/accueil}" class="btn btn-danger btn-sm"
+           onclick="return confirm('Quitter la partie en cours ?')">Quitter</a>
+      </div>
+
+    </header>
+
+    <!-- ════════════════════════════════════
+         PLATEAU DE JEU
+    ════════════════════════════════════ -->
+    <div class="board-wrapper">
+      <div id="board"></div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         MODAL — VICTOIRE
+    ════════════════════════════════════ -->
+    <div class="modal-overlay" id="modal-win">
+      <div class="modal">
+        <span class="modal-icon">🏆</span>
+        <h2 class="modal-title">VICTOIRE !</h2>
+        <div class="modal-score" id="win-score">0</div>
+        <div class="modal-detail">
+          <strong id="win-level">Niveau</strong>
+          &nbsp;·&nbsp;
+          <span id="win-theme">Thème</span>
+        </div>
+        <div class="modal-detail" style="margin-top:0.4rem;">
+          <span id="win-moves">—</span>
+          &nbsp;·&nbsp;
+          <span id="win-time">—</span>
+        </div>
+        <div class="modal-btns" style="margin-top:1.5rem;">
+          <!-- Rejouer : même niveau, même thème -->
+          <a th:href="@{'/game/start/' + ${level} + '?theme=' + ${theme}}"
+             class="btn btn-primary">🔄 Rejouer</a>
+          <a th:href="@{/game/accueil}" class="btn btn-secondary">Menu</a>
+          <a th:href="@{/game/leaderboard}" class="btn btn-secondary">Classement</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         MODAL — DÉFAITE (temps écoulé)
+    ════════════════════════════════════ -->
+    <div class="modal-overlay" id="modal-lose">
+      <div class="modal">
+        <span class="modal-icon">⏳</span>
+        <h2 class="modal-title">TEMPS ÉCOULÉ</h2>
+        <p class="modal-detail" style="margin:1rem 0 1.5rem;">
+          Ne perdez pas espoir — chaque essai vous rapproche de la maîtrise !
+        </p>
+        <div class="modal-btns">
+          <!-- Rejouer : même niveau, même thème -->
+          <a th:href="@{'/game/start/' + ${level} + '?theme=' + ${theme}}"
+             class="btn btn-primary">🔄 Rejouer</a>
+          <a th:href="@{/game/accueil}" class="btn btn-secondary">Menu</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.page-wrap -->
+
+  <!-- ════════════════════════════════════
+       SCRIPTS
+  ════════════════════════════════════ -->
+  <th:block th:replace="~{fragments/scripts :: scripts}"></th:block>
+
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+
+    // Données injectées par Thymeleaf
+    const CTX_PATH   = /*[[@{/}]]*/ '/';   // context path Tomcat (ex: /memory-game-1.0-SNAPSHOT/)
+    const BOARD      = (/*[[${board}]]*/ []).map(p => CTX_PATH + p);
+    const LEVEL      = /*[[${level}]]*/ 1;
+    const THEME      = /*[[${theme}]]*/ 'theme1';
+    const TIME_LIMIT = /*[[${config['timeLimit']}]]*/ 120;
+
+    // État sauvegardé (null pour une nouvelle partie)
+    const SAVED_RAW  = /*[[${savedGame}]]*/ null;
+    const FLIPPED    = /*[[${flippedState}]]*/ null;
+
+    const SAVED_STATE = SAVED_RAW ? {
+      score:       /*[[${savedGame?.score}]]*/ 0,
+      moves:       /*[[${savedGame?.movesCount}]]*/ 0,
+      timeElapsed: /*[[${savedGame?.timeElapsed}]]*/ 0,
+      flipped:     FLIPPED
+    } : null;
+
+    // Lancement du jeu
+    const game = new MemoryGame({
+      board:      BOARD,
+      level:      LEVEL,
+      theme:      THEME,
+      timeLimit:  TIME_LIMIT,
+      savedState: SAVED_STATE
+    });
+
+    /*]]>*/
+  </script>
+
+</body>
+</html>
