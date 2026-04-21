@@ -1,0 +1,13 @@
+com\memorygame\controller\GameController.class
+com\memorygame\controller\AuthController.class
+com\memorygame\config\AppInitializer.class
+com\memorygame\model\Player.class
+com\memorygame\repository\SavedGameRepository.class
+com\memorygame\repository\ScoreEntryRepository.class
+com\memorygame\service\PlayerService.class
+com\memorygame\config\WebConfig.class
+com\memorygame\config\AppConfig.class
+com\memorygame\repository\PlayerRepository.class
+com\memorygame\model\SavedGame.class
+com\memorygame\model\ScoreEntry.class
+com\memorygame\service\GameService.class

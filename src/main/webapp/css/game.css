@@ -18,10 +18,10 @@
    ici suffit a changer l'apparence partout.
 ------------------------------------------------------------- */
 :root {
-  --bg-deep:        #04050f;
-  --bg-mid:         #0b0d1f;
-  --bg-surface:     #10133a;
-  --bg-card:        #141836;
+  --bg-deep:        #0d1026;
+  --bg-mid:         #151838;
+  --bg-surface:     #1c2050;
+  --bg-card:        #1f2448;
   --accent-gold:    #d4a847;
   --accent-silver:  #8ab3d4;
   --accent-purple:  #7b5ea7;
@@ -30,8 +30,8 @@
   --text-muted:     #7a7a9a;
   --text-gold:      #d4a847;
   --border-glow:    rgba(212, 168, 71, 0.35);
-  --card-back:      #1a1d4a;
-  --card-front:     #0f1235;
+  --card-back:      #252960;
+  --card-front:     #191e4a;
   --radius-sm:      8px;
   --radius-md:      14px;
   --radius-lg:      20px;
