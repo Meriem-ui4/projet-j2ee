@@ -24,17 +24,14 @@ public class ScoreEntryRepository {
         sessionFactory.getCurrentSession().save(entry);
     }
 
-    /**
-     * Retourne toutes les entrees du classement triees par score decroissant.
-     */
+    /** Retourne toutes les entrees du classement triees par score decroissant. */
     public List<ScoreEntry> findAllOrderByScore() {
         return sessionFactory.getCurrentSession()
                 .createQuery("FROM ScoreEntry ORDER BY score DESC", ScoreEntry.class)
                 .list();
     }
 
-    /**
-     * Retourne les N meilleurs scores du classement.
+    /** Retourne les N meilleurs scores du classement.
      * @param limit Nombre maximum de resultats
      */
     public List<ScoreEntry> findTopScores(int limit) {

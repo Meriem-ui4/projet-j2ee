@@ -2,11 +2,14 @@ package com.memorygame.controller;
 
 import com.memorygame.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -21,19 +24,14 @@ public class AuthController {
     @Autowired
     private PlayerService playerService;
 
-    /**
-     * Redirige la racine vers le menu si connecte, sinon vers la connexion.
-     */
+    /** Redirige la racine vers le menu si connecte, sinon vers la connexion. */
     @GetMapping("/")
     public String home(HttpSession session) {
         if (session.getAttribute("playerId") != null) return "redirect:/game/menu";
         return "redirect:/login";
     }
 
-    /**
-     * Affiche la page de connexion avec un token CSRF.
-     * Redirige vers le menu si le joueur est deja connecte.
-     */
+    /** Affiche la page de connexion avec un token CSRF. */
     @GetMapping("/login")
     public String loginPage(HttpSession session, Model model) {
         if (session.getAttribute("playerId") != null) return "redirect:/game/menu";
@@ -89,6 +87,9 @@ public class AuthController {
     public String menuRedirect(@RequestParam(required = false) Long login,
                                 @RequestParam(required = false) String user,
                                 HttpSession session) {
+
+        System.out.println("Session créée avec playerId=" + login);
+
         if (login != null && user != null && session.getAttribute("playerId") == null) {
             session.setAttribute("playerId", login);
             session.setAttribute("username", user);
@@ -96,9 +97,7 @@ public class AuthController {
         return "forward:/game/menu-view";
     }
 
-    /**
-     * Affiche la page d'inscription avec un token CSRF.
-     */
+    /** Affiche la page d'inscription avec un token CSRF. */
     @GetMapping("/register")
     public String registerPage(HttpSession session, Model model) {
         if (session.getAttribute("playerId") != null) return "redirect:/game/menu";
@@ -143,9 +142,49 @@ public class AuthController {
         return "auth/register";
     }
 
-    /**
-     * Invalide la session HTTP et redirige vers la page de connexion.
-     */
+    /** Changer le pseudo du joueur connecte. */
+    @PostMapping("/auth/changeusername")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> changeUsername(
+            @RequestBody Map<String, String> body,
+            HttpSession session) {
+ 
+        Long playerId = (Long) session.getAttribute("playerId");
+        if (playerId == null)
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Non connecté"));
+ 
+        String newUsername = body.getOrDefault("username", "").trim();
+        String error = playerService.changeUsername(playerId, newUsername);
+        if (error != null)
+            return ResponseEntity.ok(Map.of("success", false, "message", error));
+ 
+        session.setAttribute("username", newUsername);
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    /** Changer le mot de passe du joueur connecte. */
+    @PostMapping("/auth/changepassword")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> changePassword(
+            @RequestBody Map<String, String> body,
+            HttpSession session) {
+ 
+        Long playerId = (Long) session.getAttribute("playerId");
+        if (playerId == null)
+            return ResponseEntity.status(401)
+                    .body(Map.of("success", false, "message", "Non connecté"));
+ 
+        String oldPassword = body.getOrDefault("oldPassword", "");
+        String newPassword = body.getOrDefault("newPassword", "");
+ 
+        String error = playerService.changePassword(playerId, oldPassword, newPassword);
+        if (error != null)
+            return ResponseEntity.ok(Map.of("success", false, "message", error));
+ 
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    /** Invalide la session HTTP et redirige vers la page de connexion. */
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();

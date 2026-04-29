@@ -48,21 +48,66 @@
               <span class="form-hint">Utilisé pour la connexion (en plus du pseudo)</span>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-field">
               <label class="form-label" for="password">Mot de passe</label>
-              <input id="password" name="password" type="password"
-                     class="form-input"
-                     placeholder="minimum 6 caractères"
-                     required minlength="6"/>
+
+              <div class="password-wrapper">
+                <input id="password" name="password" type="password"
+                       class="form-input"
+                       placeholder="minimum 6 caractères"
+                       required minlength="6"/>
+              
+                <span class="toggle-eye" onclick="togglePassword('password', this)">
+                
+                  <svg class="eye-open" viewBox="0 0 24 24" width="20" height="20"
+                       fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                
+                  <svg class="eye-closed" viewBox="0 0 24 24" width="20" height="20"
+                       fill="none" stroke="currentColor" stroke-width="2"
+                       style="display:none;">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.77 21.77 0 0 1 5.06-5.94"/>
+                    <path d="M1 1l22 22"/>
+                    <path d="M9.53 9.53a3 3 0 0 0 4.24 4.24"/>
+                    <path d="M14.47 14.47A3 3 0 0 0 9.53 9.53"/>
+                  </svg>
+                
+                </span>
+              </div>
+            
               <span class="form-hint">Minimum 6 caractères</span>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-field">
               <label class="form-label" for="confirm">Confirmer le mot de passe</label>
-              <input id="confirm" name="confirm" type="password"
-                     class="form-input"
-                     placeholder="••••••••"
-                     required minlength="6"/>
+                        
+              <div class="password-wrapper">
+                <input id="confirm" name="confirm" type="password"
+                       class="form-input"
+                       placeholder="••••••••"
+                       required minlength="6"/>
+              
+                <span class="toggle-eye" onclick="togglePassword('confirm', this)">
+                
+                  <svg class="eye-open" viewBox="0 0 24 24" width="20" height="20"
+                       fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                
+                  <svg class="eye-closed" viewBox="0 0 24 24" width="20" height="20"
+                       fill="none" stroke="currentColor" stroke-width="2"
+                       style="display:none;">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.77 21.77 0 0 1 5.06-5.94"/>
+                    <path d="M1 1l22 22"/>
+                    <path d="M9.53 9.53a3 3 0 0 0 4.24 4.24"/>
+                    <path d="M14.47 14.47A3 3 0 0 0 9.53 9.53"/>
+                  </svg>
+                
+                </span>
+              </div>
             </div>
 
             <button type="submit" id="submit-btn"
@@ -86,7 +131,6 @@
 
   <th:block th:replace="~{fragments/scripts :: scripts}"></th:block>
   <script>
-    // Vérification côté client : les 2 mots de passe correspondent
     document.querySelector('form').addEventListener('submit', function(e) {
       const pwd     = document.getElementById('password').value;
       const confirm = document.getElementById('confirm').value;

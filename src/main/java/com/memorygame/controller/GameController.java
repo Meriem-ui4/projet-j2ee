@@ -1,10 +1,10 @@
 package com.memorygame.controller;
 
 import com.memorygame.model.SavedGame;
-import com.memorygame.model.ScoreEntry;
 import com.memorygame.service.GameService;
 import com.memorygame.service.PlayerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,15 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 import java.util.*;
 
-/**
- * Controleur Spring MVC pour le jeu memoire.
- * Gere les routes du menu, du demarrage de partie, de la reprise
- * d'une sauvegarde, des endpoints AJAX (sauvegarde et fin de partie)
- * et du classement.
- *
- * Toutes les routes protegees verifient que le joueur est connecte
- * avant d'executer l'action (methode isLoggedIn).
- */
+
 @Controller
 @RequestMapping("/game")
 public class GameController {
@@ -42,10 +34,7 @@ public class GameController {
         return getPlayerId(session) != null;
     }
 
-    /**
-     * Affiche le menu principal avec la selection du theme et du niveau.
-     * Injecte les donnees du joueur, la presence d'une sauvegarde et le classement.
-     */
+    /** Affiche le menu principal avec la selection du theme et du niveau */
     @GetMapping("/menu-view")
     public String menuView(HttpSession session, Model model) {
         if (!isLoggedIn(session)) return "redirect:/login";
@@ -57,9 +46,7 @@ public class GameController {
         return "game/menu";
     }
 
-    /**
-     * Alias du menu principal (accessible via le lien Accueil du jeu).
-     */
+    /** Alias du menu principal. */
     @GetMapping("/accueil")
     public String accueil(HttpSession session, Model model) {
         if (!isLoggedIn(session)) return "redirect:/login";
@@ -71,11 +58,7 @@ public class GameController {
         return "game/menu";
     }
 
-    /**
-     * Demarre une nouvelle partie pour le niveau et le theme demandes.
-     * Genere un plateau melange via GameService et injecte toutes les
-     * donnees necessaires a la vue play.html.
-     *
+    /** Demarre une nouvelle partie pour le niveau et le theme demandes.
      * @param level Niveau de 1 a 3 (valide par verification)
      * @param theme Identifiant du theme (theme1, theme2 ou theme3)
      */
@@ -102,11 +85,7 @@ public class GameController {
         return "game/play";
     }
 
-    /**
-     * Reprend la derniere partie sauvegardee du joueur connecte.
-     * Deserialise le plateau et l'etat des cartes depuis la base de donnees.
-     * Redirige vers le menu si aucune sauvegarde n'est trouvee.
-     */
+    /** Reprend la derniere partie sauvegardee du joueur connecte. */
     @GetMapping("/resume")
     public String resumeGame(HttpSession session, Model model) {
         if (!isLoggedIn(session)) return "redirect:/login";
@@ -116,8 +95,8 @@ public class GameController {
 
         SavedGame sg = saved.get();
         try {
-            List<String>  board   = mapper.readValue(sg.getBoardState(),   List.class);
-            List<Boolean> flipped = mapper.readValue(sg.getFlippedState(), List.class);
+            List<String>  board   = mapper.readValue(sg.getBoardState(), new TypeReference<List<String>>() {});
+            List<Boolean> flipped = mapper.readValue(sg.getFlippedState(), new TypeReference<List<Boolean>>() {});
             Map<String, Object> config = gameService.getLevelConfig(sg.getLevel());
             String theme = sg.getTheme() != null ? sg.getTheme() : "theme1";
 
@@ -135,11 +114,7 @@ public class GameController {
         return "game/play";
     }
 
-    /**
-     * Endpoint AJAX (POST /game/save) pour sauvegarder une partie en cours.
-     * Appele par le bouton Sauvegarder en JavaScript (fetch API).
-     * Retourne un objet JSON indiquant le succes ou l'echec.
-     */
+    /** Endpoint AJAX (POST /game/save) pour sauvegarder une partie en cours. */
     @PostMapping("/save")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> saveGame(
@@ -156,8 +131,16 @@ public class GameController {
             int    score       = (int)    body.get("score");
             int    moves       = (int)    body.get("moves");
             int    timeElapsed = (int)    body.get("timeElapsed");
-            List<String>  board   = (List<String>)  body.get("board");
-            List<Boolean> flipped = (List<Boolean>) body.get("flipped");
+            List<?> rawBoard = (List<?>) body.get("board");
+            List<String> board = rawBoard.stream()
+                .map(Object::toString)
+                .map(p -> {
+                    int idx = p.indexOf("images/");
+                    return (idx >= 0) ? p.substring(idx) : p;
+                })
+                .toList();
+            List<?> rawFlipped = (List<?>) body.get("flipped");
+            List<Boolean> flipped = rawFlipped.stream().map(val -> Boolean.valueOf(val.toString())).toList();
 
             gameService.saveGame(playerId, level, theme, score, moves, timeElapsed, board, flipped);
             return ResponseEntity.ok(Map.of("success", true, "message", "Partie sauvegardee !"));
@@ -168,11 +151,7 @@ public class GameController {
         }
     }
 
-    /**
-     * Endpoint AJAX (POST /game/complete) appele a la victoire.
-     * Enregistre le score final dans le classement via GameService.
-     * Retourne un objet JSON indiquant le succes ou l'echec.
-     */
+    /** Endpoint AJAX (POST /game/complete) appele a la victoire. */
     @PostMapping("/complete")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> completeGame(
@@ -197,15 +176,26 @@ public class GameController {
         }
     }
 
-    /**
-     * Affiche la page du classement general.
-     * Accessible meme sans etre connecte.
-     */
+    /** * Affiche la page du classement general. */
     @GetMapping("/leaderboard")
     public String leaderboard(HttpSession session, Model model) {
         model.addAttribute("scores",     gameService.getLeaderboard());
         model.addAttribute("themeNames", GameService.THEME_NAMES);
         model.addAttribute("isLoggedIn", isLoggedIn(session));
         return "game/leaderboard";
+    }
+
+    /** Supprimer la sauvegarde. */
+    @PostMapping("/deletesave")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> deleteSave(HttpSession session) {
+        if (!isLoggedIn(session))
+            return ResponseEntity.status(401).body(Map.of("success", false));
+        try {
+            gameService.deleteSave(getPlayerId(session));
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false));
+        }
     }
 }

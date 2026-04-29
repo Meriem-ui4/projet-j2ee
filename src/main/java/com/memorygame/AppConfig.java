@@ -14,7 +14,7 @@ import java.util.Properties;
  * utilises par Hibernate pour acceder a la base de donnees MySQL.
  *
  * Prerequis avant lancement :
- *   1. Demarrer WampServer (MySQL sur le port 3306)
+ *   1. Demarrer WampServer (MySQL sur le port 3308)
  *   2. Creer la base de donnees :
  *        CREATE DATABASE memorygame CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
  *   3. Les tables sont creees automatiquement par Hibernate (hbm2ddl.auto=update)
@@ -32,7 +32,7 @@ public class AppConfig {
     public DataSource dataSource() {
         DriverManagerDataSource ds = new DriverManagerDataSource();
         ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        ds.setUrl("jdbc:mysql://localhost:3306/memorygame?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8");
+        ds.setUrl("jdbc:mysql://localhost:3308/memorygame?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8");
         ds.setUsername("root");
         ds.setPassword("");
         return ds;

@@ -15,8 +15,6 @@ import java.util.Optional;
  *
  * Securite :
  *   - Les mots de passe sont hasches avec BCrypt (facteur 12).
- *   - BCrypt ne permet pas de retrouver le mot de passe original :
- *     la verification re-hashe et compare les empreintes.
  *   - L'email est valide par expression reguliere avant insertion.
  */
 @Service
@@ -76,12 +74,11 @@ public class PlayerService {
 
     /**
      * Authentifie un joueur par nom d'utilisateur ou email.
-     * Cherche d'abord par username, puis par email si non trouve.
      * Verifie le mot de passe avec BCrypt.
      *
      * @param usernameOrEmail Nom d'utilisateur ou adresse email
      * @param password        Mot de passe en clair a verifier
-     * @return Optional contenant le joueur si authentifie, vide sinon
+     * @return 
      */
     public Optional<Player> login(String usernameOrEmail, String password) {
         if (usernameOrEmail == null || password == null) return Optional.empty();
@@ -98,8 +95,6 @@ public class PlayerService {
 
     /**
      * Met a jour le meilleur score et incremente le compteur de parties.
-     * Le meilleur score n'est mis a jour que si le nouveau score est superieur.
-     *
      * @param playerId Identifiant du joueur
      * @param newScore Score obtenu lors de la partie terminee
      */
@@ -128,5 +123,53 @@ public class PlayerService {
      */
     public Optional<Player> findById(Long id) {
         return playerRepository.findById(id);
+    }
+
+    /**
+     * Change le pseudo d'un joueur connecte.
+     * @return null si succes, message d'erreur sinon
+     */
+    public String changeUsername(Long playerId, String newUsername) {
+        if (newUsername == null || newUsername.isBlank())
+            return "Le pseudo ne peut pas être vide.";
+        if (newUsername.length() < USERNAME_MIN || newUsername.length() > USERNAME_MAX)
+            return "Le pseudo doit contenir entre " + USERNAME_MIN + " et " + USERNAME_MAX + " caractères.";
+        if (!newUsername.matches(USERNAME_PATTERN))
+            return "Le pseudo ne peut contenir que des lettres, chiffres et _.";
+        if (playerRepository.findByUsername(newUsername).isPresent())
+            return "Ce pseudo est déjà pris.";
+ 
+        playerRepository.findById(playerId).ifPresent(player -> {
+            player.setUsername(newUsername);
+            playerRepository.update(player);
+        });
+        return null;
+    }
+
+    /**
+     * Change le mot de passe d'un joueur connecte.
+     * @param playerId    Identifiant du joueur connecte
+     * @param oldPassword Mot de passe actuel en clair (pour verification)
+     * @param newPassword Nouveau mot de passe en clair (minimum 6 caracteres)
+     * @return null si succes, message d'erreur lisible sinon
+     */
+    public String changePassword(Long playerId, String oldPassword, String newPassword) {
+        if (oldPassword == null || oldPassword.isBlank())
+            return "Veuillez entrer votre mot de passe actuel.";
+        if (newPassword == null || newPassword.length() < PASSWORD_MIN)
+            return "Le nouveau mot de passe doit contenir au moins " + PASSWORD_MIN + " caractères.";
+        if (oldPassword.equals(newPassword))
+            return "Le nouveau mot de passe doit être différent de l'ancien.";
+ 
+        Optional<Player> opt = playerRepository.findById(playerId);
+        if (opt.isEmpty()) return "Joueur introuvable.";
+ 
+        Player player = opt.get();
+        if (!BCrypt.checkpw(oldPassword, player.getPassword()))
+            return "Mot de passe actuel incorrect.";
+ 
+        player.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
+        playerRepository.update(player);
+        return null;
     }
 }

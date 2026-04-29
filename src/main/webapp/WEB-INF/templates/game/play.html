@@ -12,11 +12,8 @@
 
   <div class="page-wrap game-page">
 
-    <!-- ════════════════════════════════════
-         HUD — barre de jeu en haut
-    ════════════════════════════════════ -->
+    <!-- HUD — barre de jeu -->
     <header class="game-header">
-
       <div class="hud">
 
         <div class="hud-item">
@@ -55,7 +52,11 @@
 
       <!-- Actions -->
       <div class="game-actions">
-        <button id="btn-pause" class="btn btn-secondary btn-sm">Pause</button>
+        <button id="btn-pause" class="btn btn-secondary btn-sm" title="Pause / Reprendre">⏸️</button>
+        <button id="btn-restart" class="btn btn-secondary btn-sm" title="Recommencer la partie">🔄</button>
+        <button onclick="document.getElementById('helpModal').style.display='flex'"
+                class="btn btn-secondary btn-sm" title="Règles du jeu">❓</button>
+
         <button id="btn-save"  class="btn btn-primary btn-sm">Sauvegarder ✦</button>
         <a th:href="@{/game/accueil}" class="btn btn-danger btn-sm"
            onclick="return confirm('Quitter la partie en cours ?')">Quitter</a>
@@ -63,16 +64,12 @@
 
     </header>
 
-    <!-- ════════════════════════════════════
-         PLATEAU DE JEU
-    ════════════════════════════════════ -->
+    <!-- PLATEAU DE JEU -->
     <div class="board-wrapper">
       <div id="board"></div>
     </div>
 
-    <!-- ════════════════════════════════════
-         MODAL — VICTOIRE
-    ════════════════════════════════════ -->
+    <!-- MODAL — VICTOIRE -->
     <div class="modal-overlay" id="modal-win">
       <div class="modal">
         <span class="modal-icon">🏆</span>
@@ -88,8 +85,8 @@
           &nbsp;·&nbsp;
           <span id="win-time">—</span>
         </div>
+
         <div class="modal-btns" style="margin-top:1.5rem;">
-          <!-- Rejouer : même niveau, même thème -->
           <a th:href="@{'/game/start/' + ${level} + '?theme=' + ${theme}}"
              class="btn btn-primary">🔄 Rejouer</a>
           <a th:href="@{/game/accueil}" class="btn btn-secondary">Menu</a>
@@ -98,9 +95,7 @@
       </div>
     </div>
 
-    <!-- ════════════════════════════════════
-         MODAL — DÉFAITE (temps écoulé)
-    ════════════════════════════════════ -->
+    <!-- MODAL — DÉFAITE -->
     <div class="modal-overlay" id="modal-lose">
       <div class="modal">
         <span class="modal-icon">⏳</span>
@@ -108,8 +103,8 @@
         <p class="modal-detail" style="margin:1rem 0 1.5rem;">
           Ne perdez pas espoir — chaque essai vous rapproche de la maîtrise !
         </p>
+
         <div class="modal-btns">
-          <!-- Rejouer : même niveau, même thème -->
           <a th:href="@{'/game/start/' + ${level} + '?theme=' + ${theme}}"
              class="btn btn-primary">🔄 Rejouer</a>
           <a th:href="@{/game/accueil}" class="btn btn-secondary">Menu</a>
@@ -117,31 +112,137 @@
       </div>
     </div>
 
-  </div><!-- /.page-wrap -->
+  </div>
 
-  <!-- ════════════════════════════════════
-       SCRIPTS
-  ════════════════════════════════════ -->
+  <!-- MODALE — AIDE / RÈGLES DU JEU -->
+  <div id="helpModal"
+       style="display:none; position:fixed; inset:0; z-index:9999;
+              background:rgba(0,0,0,0.82); backdrop-filter:blur(5px);
+              align-items:center; justify-content:center;"
+       onclick="if(event.target===this) this.style.display='none'">
+ 
+    <div style="background:#0d1b3e; border:2px solid #c9a84c; border-radius:16px;
+                padding:2rem 2.5rem; max-width:560px; width:92%;
+                max-height:85vh; overflow-y:auto; color:#fff; position:relative;">
+ 
+      <button onclick="document.getElementById('helpModal').style.display='none'"
+              style="position:absolute; top:1rem; right:1rem; background:transparent;
+                     border:none; color:#c9a84c; font-size:1.4rem; cursor:pointer;">✕</button>
+ 
+      <h2 style="color:#c9a84c; text-align:center; margin:0 0 1.5rem; letter-spacing:2px;">
+        📖 RÈGLES DU JEU
+      </h2>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.4rem;">🎯 Objectif</h3>
+      <p style="margin:0 0 1.2rem; line-height:1.6;">
+        Retrouvez toutes les paires de cartes identiques avant la fin du chronomètre.
+        Plus vous êtes rapide et précis, plus votre score est élevé !
+      </p>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.4rem;">🕹️ Comment jouer</h3>
+      <ul style="margin:0 0 1.2rem; padding-left:1.4rem; line-height:1.9;">
+        <li>Cliquez sur une carte pour la retourner.</li>
+        <li>Cliquez sur une deuxième carte.</li>
+        <li>Si identiques → elles restent visibles ✅</li>
+        <li>Sinon → elles se retournent et vous perdez des points ❌</li>
+      </ul>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.6rem;">📊 Niveaux de difficulté</h3>
+      <table style="width:100%; border-collapse:collapse; text-align:center;
+                    margin-bottom:1.2rem; font-size:0.93rem;">
+        <thead>
+          <tr style="color:#c9a84c; border-bottom:1px solid #c9a84c44;">
+            <th style="padding:0.4rem;">Niveau</th>
+            <th>Grille</th><th>Paires</th><th>Temps</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #ffffff11;">
+            <td style="padding:0.5rem;">🌿 Facile</td><td>4 × 4</td><td>8</td><td>2 min</td>
+          </tr>
+          <tr style="border-bottom:1px solid #ffffff11;">
+            <td style="padding:0.5rem;">🌙 Moyen</td><td>5 × 4</td><td>10</td><td>90 s</td>
+          </tr>
+          <tr>
+            <td style="padding:0.5rem;">☄️ Difficile</td><td>6 × 4</td><td>12</td><td>60 s</td>
+          </tr>
+        </tbody>
+      </table>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.4rem;">⚡ Mini-jeu Labyrinthe</h3>
+      <p style="margin:0 0 0.5rem; line-height:1.6;">
+        Toutes les <strong style="color:#c9a84c;">4 paires trouvées</strong>, un labyrinthe surgit !
+      </p>
+      <ul style="margin:0 0 1.2rem; padding-left:1.4rem; line-height:1.9;">
+        <li>Naviguez avec les <strong>flèches ← ↑ → ↓</strong> du clavier.</li>
+        <li>Atteignez 🏁 en <strong style="color:#c9a84c;">10 secondes</strong>.</li>
+        <li>Réussi → <strong style="color:#4caf50;">+10 secondes</strong> au chrono 🎁</li>
+        <li>Raté → la partie continue, <strong>sans pénalité</strong>.</li>
+      </ul>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.4rem;">🏆 Calcul du score</h3>
+      <div style="background:#ffffff0f; border-radius:8px; padding:0.8rem 1rem;
+                  font-family:monospace; font-size:0.9rem; margin-bottom:1.5rem;">
+        Score = (niveau × 1000) - [max(0, coups - paires) x 10] − (tempsUtilise x 2) + (tempsRestant x 3)
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE — MINI-JEU LABYRINTHE -->
+  <div id="mazeModal"
+       style="display:none; position:fixed; inset:0; z-index:9998;
+              background:rgba(0,0,0,0.82); backdrop-filter:blur(5px);
+              align-items:center; justify-content:center; flex-direction:column;">
+    <div style="background:#0d1b3e; border:2px solid #c9a84c; border-radius:16px;
+                padding:2rem; text-align:center; min-width:340px;">
+      <h3 style="color:#c9a84c; margin:0 0 0.5rem; letter-spacing:1px;">⚡ MINI-JEU LABYRINTHE !</h3>
+      <p style="color:#fff; margin:0 0 1rem;">
+        Atteins 🏁 en
+        <strong id="mazeTimerDisplay" style="color:#f44336; font-size:1.4rem;">10</strong>s
+        → <strong style="color:#4caf50;">+10 secondes</strong> bonus !
+      </p>
+      <canvas id="mazeCanvas" width="280" height="280"
+              style="border:2px solid #c9a84c44; border-radius:8px; display:block; margin:0 auto;"></canvas>
+      <p style="color:#aaa; font-size:0.82rem; margin-top:0.8rem;">Utilise les flèches ← ↑ → ↓</p>
+    </div>
+  </div>
+ 
+  <div id="mazeLamp" style="display:none; position:fixed; top: 100px; right: 20px; z-index:9999;
+            cursor: pointer; 
+            font-size: 2rem;">
+  💡
+  </div>
+  <div id="mazeToast"
+       style="display:none; position:fixed; bottom:2rem; left:50%; transform:translateX(-50%);
+              background:#1a2f5e; border:2px solid #c9a84c; color:#fff;
+              padding:0.7rem 1.8rem; border-radius:30px; z-index:10000; font-weight:600;">
+  </div>
+
+  <!-- SCRIPTS -->
   <th:block th:replace="~{fragments/scripts :: scripts}"></th:block>
 
   <script th:inline="javascript">
     /*<![CDATA[*/
 
     // Données injectées par Thymeleaf
-    const CTX_PATH   = /*[[@{/}]]*/ '/';   // context path Tomcat (ex: /memory-game-1.0-SNAPSHOT/)
-    const BOARD      = (/*[[${board}]]*/ []).map(p => CTX_PATH + p);
+    const CTX_PATH   = /*[[@{/}]]*/ '/';  
+    const RAW_BOARD   = /*[[${board}]]*/ [];
+    const BOARD = RAW_BOARD.map(p => {
+        if (p.startsWith('http') || p.startsWith(CTX_PATH)) return p;
+        return CTX_PATH + p;
+    });
     const LEVEL      = /*[[${level}]]*/ 1;
     const THEME      = /*[[${theme}]]*/ 'theme1';
     const TIME_LIMIT = /*[[${config['timeLimit']}]]*/ 120;
 
     // État sauvegardé (null pour une nouvelle partie)
-    const SAVED_RAW  = /*[[${savedGame}]]*/ null;
+    const SAVED_RAW   = /*[[${savedGame != null}]]*/ false;
     const FLIPPED    = /*[[${flippedState}]]*/ null;
 
     const SAVED_STATE = SAVED_RAW ? {
-      score:       /*[[${savedGame?.score}]]*/ 0,
-      moves:       /*[[${savedGame?.movesCount}]]*/ 0,
-      timeElapsed: /*[[${savedGame?.timeElapsed}]]*/ 0,
+      score:       /*[[${savedGame?.score ?: 0}]]*/ 0,
+      moves:       /*[[${savedGame?.movesCount ?: 0}]]*/ 0,
+      timeElapsed: /*[[${savedGame?.timeElapsed ?: 0}]]*/ 0,
       flipped:     FLIPPED
     } : null;
 
@@ -154,6 +255,7 @@
       savedState: SAVED_STATE
     });
 
+    window.currentGame = game;
     /*]]>*/
   </script>
 

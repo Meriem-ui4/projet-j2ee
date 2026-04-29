@@ -50,11 +50,7 @@ public class GameService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /**
-     * Noms des cartes par theme et par niveau.
-     * Chaque entree contient les noms de fichiers sans extension.
-     * Le chemin complet est construit dans generateBoard().
-     */
+    /** Noms des cartes par theme et par niveau. */
     private static final Map<String, Map<Integer, List<String>>> THEME_CARDS;
 
     static {
@@ -120,11 +116,7 @@ public class GameService {
         return config;
     }
 
-    /**
-     * Genere un plateau de jeu melange.
-     * Construit les chemins relatifs des images (ex: images/theme1/niveau1/card1.jpg),
-     * duplique la liste pour former les paires, puis melange aleatoirement.
-     *
+    /** Genere un plateau de jeu melange.
      * @param level Niveau de difficulte (1, 2 ou 3)
      * @param theme Identifiant du theme (theme1, theme2 ou theme3)
      * @return Liste des chemins d'images dans un ordre aleatoire
@@ -206,6 +198,15 @@ public class GameService {
         }
     }
 
+    /**
+     * Supprime la sauvegarde en cours d'un joueur (action volontaire depuis le menu).
+     * @param playerId Identifiant du joueur
+     */
+    public void deleteSave(Long playerId) {
+        savedGameRepository.findLatestByPlayerId(playerId)
+                .ifPresent(sg -> savedGameRepository.delete(sg.getId()));
+    }
+    
     /**
      * Charge la derniere partie non terminee d'un joueur.
      * @param playerId Identifiant du joueur

@@ -25,15 +25,14 @@ public class PlayerRepository {
         sessionFactory.getCurrentSession().save(player);
     }
 
-    /** Met a jour un joueur existant (meilleur score, total parties). */
+    /** Met a jour un joueur existant. */
     public void update(Player player) {
         sessionFactory.getCurrentSession().merge(player);
     }
 
-    /**
-     * Recherche un joueur par son nom d'utilisateur (insensible a la casse).
+    /** Recherche un joueur par son nom d'utilisateur.
      * @param username Nom d'utilisateur a rechercher
-     * @return Optional contenant le joueur, ou vide si non trouve
+     * @return 
      */
     public Optional<Player> findByUsername(String username) {
         List<Player> result = sessionFactory.getCurrentSession()
@@ -43,10 +42,9 @@ public class PlayerRepository {
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
-    /**
-     * Recherche un joueur par son adresse email (insensible a la casse).
+    /** Recherche un joueur par son adresse email.
      * @param email Adresse email a rechercher
-     * @return Optional contenant le joueur, ou vide si non trouve
+     * @return 
      */
     public Optional<Player> findByEmail(String email) {
         List<Player> result = sessionFactory.getCurrentSession()
@@ -56,18 +54,16 @@ public class PlayerRepository {
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
-    /**
-     * Recherche un joueur par son identifiant numerique.
+    /** Recherche un joueur par son identifiant numerique.
      * @param id Identifiant du joueur
-     * @return Optional contenant le joueur, ou vide si inexistant
+     * @return 
      */
     public Optional<Player> findById(Long id) {
         Player p = sessionFactory.getCurrentSession().get(Player.class, id);
         return Optional.ofNullable(p);
     }
 
-    /**
-     * Retourne les N meilleurs joueurs classes par meilleur score decroissant.
+    /** Retourne les N meilleurs joueurs classes par meilleur score decroissant.
      * @param limit Nombre maximum de resultats
      */
     public List<Player> findTopScores(int limit) {

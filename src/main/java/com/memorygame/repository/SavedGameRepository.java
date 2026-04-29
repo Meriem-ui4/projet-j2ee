@@ -26,18 +26,16 @@ public class SavedGameRepository {
         sessionFactory.getCurrentSession().saveOrUpdate(game);
     }
 
-    /**
-     * Recherche une sauvegarde par son identifiant.
+    /** Recherche une sauvegarde par son identifiant.
      * @param id Identifiant de la sauvegarde
-     * @return Optional contenant la sauvegarde, ou vide si inexistante
+     * @return 
      */
     public Optional<SavedGame> findById(Long id) {
         SavedGame g = sessionFactory.getCurrentSession().get(SavedGame.class, id);
         return Optional.ofNullable(g);
     }
 
-    /**
-     * Retourne toutes les sauvegardes d'un joueur, triees par date decroissante.
+    /** Retourne toutes les sauvegardes d'un joueur, triees par date decroissante.
      * @param playerId Identifiant du joueur
      */
     public List<SavedGame> findByPlayerId(Long playerId) {
@@ -49,10 +47,9 @@ public class SavedGameRepository {
                 .list();
     }
 
-    /**
-     * Retourne la derniere partie non terminee d'un joueur (pour la reprise).
+    /** Retourne la derniere partie non terminee d'un joueur (pour la reprise).
      * @param playerId Identifiant du joueur
-     * @return Optional contenant la sauvegarde, ou vide si aucune
+     * @return 
      */
     public Optional<SavedGame> findLatestByPlayerId(Long playerId) {
         List<SavedGame> result = sessionFactory.getCurrentSession()
@@ -65,8 +62,7 @@ public class SavedGameRepository {
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
-    /**
-     * Supprime une sauvegarde par son identifiant.
+    /** Supprime une sauvegarde par son identifiant.
      * @param id Identifiant de la sauvegarde a supprimer
      */
     public void delete(Long id) {

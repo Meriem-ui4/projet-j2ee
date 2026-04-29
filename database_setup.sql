@@ -8,18 +8,12 @@ CREATE DATABASE IF NOT EXISTS memorygame
 -- 2. Sélectionner la base
 USE memorygame;
 
--- ───────────────────────────────────────────────────────────
--- NOTE : Les tables ci-dessous sont créées AUTOMATIQUEMENT
--- par Hibernate (hbm2ddl.auto=update) au premier démarrage.
--- Ce script sert uniquement de référence / vérification.
--- ───────────────────────────────────────────────────────────
-
 -- Table des joueurs
 CREATE TABLE IF NOT EXISTS players (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     username    VARCHAR(20)  NOT NULL UNIQUE,
     email       VARCHAR(100) NOT NULL UNIQUE,
-    password    VARCHAR(255) NOT NULL COMMENT 'Hash BCrypt — jamais en clair',
+    password    VARCHAR(255) NOT NULL,
     best_score  INT NOT NULL DEFAULT 0,
     total_games INT NOT NULL DEFAULT 0,
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -54,7 +48,4 @@ CREATE TABLE IF NOT EXISTS score_entries (
     FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ───────────────────────────────────────────────────────────
--- Vérification : afficher les tables créées
--- ───────────────────────────────────────────────────────────
 SHOW TABLES;

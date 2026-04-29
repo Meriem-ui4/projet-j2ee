@@ -11,25 +11,52 @@
 
   <div class="page-wrap">
 
-    <!-- ── Navbar ────────────────────────────────────────── -->
+    <!-- Navbar -->
     <nav class="navbar">
       <span class="nav-logo">✦ MEMORY GAME</span>
       <div class="nav-links">
         <a th:href="@{/game/leaderboard}" class="nav-link">Classement</a>
-        <span class="nav-user" th:text="'Bonjour, ' + ${player?.username} + ' ✦'">Joueur</span>
-        <a th:href="@{/logout}" class="nav-link danger">Déconnexion</a>
+
+
+        <!-- Dropdown utilisateur -->
+        <div class="user-dropdown" id="userDropdown">
+          <button class="user-dropdown-btn" id="userDropdownBtn"
+                  onclick="toggleUserDropdown(event)">
+            <span class="nav-user" th:text="'Bonjour, ' + ${player?.username} + ' ✦'">Joueur</span>
+
+            <span class="arrow">▼</span>
+          </button>
+          <div class="user-dropdown-menu" id="userDropdownMenu">
+            <button class="dropdown-item"
+                    onclick="toggleUserDropdown(event); document.getElementById('helpModal').style.display='flex'">
+              ❓ Règles du jeu
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" onclick="toggleUserDropdown(event); openChangePseudoModal()">
+              ✏️ Changer le pseudo
+            </button>
+            <button class="dropdown-item" onclick="toggleUserDropdown(event); openChangePasswordModal()">
+              🔑 Changer le mot de passe
+            </button>
+            <div class="dropdown-divider"></div>
+            <a th:href="@{/logout}" class="dropdown-item danger">
+              🚪 Déconnexion
+            </a>
+          </div>
+        </div>
+        
       </div>
     </nav>
 
     <main class="menu-page">
 
-      <!-- ── En-tête ──────────────────────────────────── -->
+      <!-- En-tête -->
       <div class="menu-header">
         <h1 class="menu-title">MEMORY GAME</h1>
         <p class="menu-sub">Choisissez un thème et un niveau pour commencer</p>
       </div>
 
-      <!-- ── Stats du joueur ──────────────────────────── -->
+      <!-- Stats du joueur -->
       <div class="stats-row" th:if="${player}">
         <div class="stat-box">
           <div class="stat-value" th:text="${player.bestScore}">0</div>
@@ -49,8 +76,18 @@
         </div>
       </div>
 
-      <!-- ── Bandeau "Reprendre" ───────────────────────── -->
-      <div class="save-banner" th:if="${hasSave}">
+      <!-- Bandeau "Reprendre" -->
+      <div class="save-banner" id="save-banner" th:if="${hasSave}">
+        <button th:data-url="@{/game/deletesave}"
+                onclick="deleteSave(this.dataset.url)"
+                title="Supprimer la sauvegarde"
+                style="background:transparent; border:1px solid rgba(201,168,76,0.4);
+                       color:#c9a84c; border-radius:50%; width:28px; height:28px;
+                       cursor:pointer; font-size:0.9rem; line-height:1;
+                       flex-shrink:0; transition:all 0.2s;"
+                onmouseover="this.style.background='rgba(201,168,76,0.15)'"
+                onmouseout="this.style.background='transparent'">✕
+        </button>
         <div>
           <div class="save-banner-title">✦ Partie en cours sauvegardée</div>
           <div class="save-banner-sub">Continuez là où vous vous êtes arrêté</div>
@@ -58,9 +95,7 @@
         <a th:href="@{/game/resume}" class="btn btn-primary">Reprendre →</a>
       </div>
 
-      <!-- ══════════════════════════════════════════════════
-           SÉLECTION DU THÈME
-      ══════════════════════════════════════════════════ -->
+      <!-- SÉLECTION DU THÈME -->
       <div class="theme-section">
         <p class="theme-section-title">① Choisissez un thème</p>
         <div class="themes-grid">
@@ -83,9 +118,7 @@
         </div>
       </div>
 
-      <!-- ══════════════════════════════════════════════════
-           SÉLECTION DU NIVEAU
-      ══════════════════════════════════════════════════ -->
+      <!-- SÉLECTION DU NIVEAU -->
       <p class="levels-section-title">② Choisissez un niveau</p>
       <div class="levels-grid">
 
@@ -112,7 +145,7 @@
 
       </div>
 
-      <!-- ── Mini classement ───────────────────────────── -->
+      <!-- Mini classement -->
       <div class="glass-card" th:if="${leaderboard != null and !#lists.isEmpty(leaderboard)}">
         <div class="lb-section-title">🏆 TOP SCORES</div>
         <table class="lb-table">
@@ -153,17 +186,209 @@
     </main>
   </div>
 
+  <!-- MODALE — AIDE / RÈGLES DU JEU -->
+  <div id="helpModal"
+       style="display:none; position:fixed; inset:0; z-index:9999;
+              background:rgba(0,0,0,0.82); backdrop-filter:blur(5px);
+              align-items:center; justify-content:center;"
+       onclick="if(event.target===this) this.style.display='none'">
+ 
+    <div style="background:#0d1b3e; border:2px solid #c9a84c; border-radius:16px;
+                padding:2rem 2.5rem; max-width:560px; width:92%;
+                max-height:85vh; overflow-y:auto; color:#fff; position:relative;">
+ 
+      <button onclick="document.getElementById('helpModal').style.display='none'"
+              style="position:absolute; top:1rem; right:1rem; background:transparent;
+                     border:none; color:#c9a84c; font-size:1.4rem; cursor:pointer;">✕</button>
+ 
+      <h2 style="color:#c9a84c; text-align:center; margin:0 0 1.5rem; letter-spacing:2px;">
+        📖 RÈGLES DU JEU
+      </h2>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.4rem;">🎯 Objectif</h3>
+      <p style="margin:0 0 1.2rem; line-height:1.6;">
+        Retrouvez toutes les paires de cartes identiques avant la fin du chronomètre.
+        Plus vous êtes rapide et précis, plus votre score est élevé !
+      </p>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.4rem;">🕹️ Comment jouer</h3>
+      <ul style="margin:0 0 1.2rem; padding-left:1.4rem; line-height:1.9;">
+        <li>Cliquez sur une carte pour la retourner.</li>
+        <li>Cliquez sur une deuxième carte.</li>
+        <li>Si identiques → elles restent visibles ✅</li>
+        <li>Sinon → elles se retournent et vous perdez des points ❌</li>
+      </ul>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.6rem;">📊 Niveaux de difficulté</h3>
+      <table style="width:100%; border-collapse:collapse; text-align:center;
+                    margin-bottom:1.2rem; font-size:0.93rem;">
+        <thead>
+          <tr style="color:#c9a84c; border-bottom:1px solid #c9a84c44;">
+            <th style="padding:0.4rem;">Niveau</th>
+            <th>Grille</th><th>Paires</th><th>Temps</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #ffffff11;">
+            <td style="padding:0.5rem;">🌿 Facile</td><td>4 × 4</td><td>8</td><td>2 min</td>
+          </tr>
+          <tr style="border-bottom:1px solid #ffffff11;">
+            <td style="padding:0.5rem;">🌙 Moyen</td><td>5 × 4</td><td>10</td><td>90 s</td>
+          </tr>
+          <tr>
+            <td style="padding:0.5rem;">☄️ Difficile</td><td>6 × 4</td><td>12</td><td>60 s</td>
+          </tr>
+        </tbody>
+      </table>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.4rem;">⚡ Mini-jeu Labyrinthe</h3>
+      <p style="margin:0 0 0.5rem; line-height:1.6;">
+        Toutes les <strong style="color:#c9a84c;">4 paires trouvées</strong>, un labyrinthe surgit !
+      </p>
+      <ul style="margin:0 0 1.2rem; padding-left:1.4rem; line-height:1.9;">
+        <li>Naviguez avec les <strong>flèches ← ↑ → ↓</strong> du clavier.</li>
+        <li>Atteignez 🏁 en <strong style="color:#c9a84c;">10 secondes</strong>.</li>
+        <li>Réussi → <strong style="color:#4caf50;">+10 secondes</strong> au chrono 🎁</li>
+        <li>Raté → la partie continue, <strong>sans pénalité</strong>.</li>
+      </ul>
+ 
+      <h3 style="color:#c9a84c; margin:0 0 0.4rem;">🏆 Calcul du score</h3>
+      <div style="background:#ffffff0f; border-radius:8px; padding:0.8rem 1rem;
+                  font-family:monospace; font-size:0.9rem; margin-bottom:1.5rem;">
+        Score = (niveau × 1000) - [max(0, coups - paires) x 10] − (tempsUtilise x 2) + (tempsRestant x 3)
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE — CHANGER LE PSEUDO -->
+  <div id="changePseudoModal"
+       style="display:none; position:fixed; inset:0; z-index:9999;
+              background:rgba(0,0,0,0.82); backdrop-filter:blur(5px);
+              align-items:center; justify-content:center;"
+       onclick="if(event.target===this) this.style.display='none'">
+    <div style="background:#0d1b3e; border:2px solid #c9a84c; border-radius:16px;
+                padding:2rem 2.5rem; max-width:420px; width:92%; color:#fff; position:relative;">
+      <button onclick="document.getElementById('changePseudoModal').style.display='none'"
+              style="position:absolute;top:1rem;right:1rem;background:transparent;
+                     border:none;color:#c9a84c;font-size:1.4rem;cursor:pointer;">✕</button>
+      <h2 style="color:#c9a84c;text-align:center;margin:0 0 1.5rem;letter-spacing:2px;">
+        ✏️ CHANGER LE PSEUDO
+      </h2>
+      <div id="pseudoError" style="display:none;background:rgba(220,60,60,0.15);
+           border:1px solid rgba(220,60,60,0.4);border-radius:8px;
+           padding:0.6rem 1rem;margin-bottom:1rem;color:#ff8080;font-size:0.88rem;"></div>
+      <div class="form-group">
+        <label class="form-label">Nouveau pseudo</label>
+        <input id="newPseudoInput" type="text" class="form-input"
+               placeholder="3 à 20 caractères" maxlength="20" minlength="3"/>
+      </div>
+      <button th:data-url="@{/auth/changeusername}" 
+              onclick="submitChangePseudo(this)"
+              class="btn btn-primary" style="width:100%;margin-top:1rem;">
+        Confirmer ✦
+      </button>
+    </div>
+  </div>
+ 
+  <!-- MODALE — CHANGER LE MOT DE PASSE -->
+  <div id="changePasswordModal"
+       style="display:none; position:fixed; inset:0; z-index:9999;
+              background:rgba(0,0,0,0.82); backdrop-filter:blur(5px);
+              align-items:center; justify-content:center;"
+       onclick="if(event.target===this) this.style.display='none'">
+    <div style="background:#0d1b3e; border:2px solid #c9a84c; border-radius:16px;
+                padding:2rem 2.5rem; max-width:420px; width:92%; color:#fff; position:relative;">
+      <button onclick="document.getElementById('changePasswordModal').style.display='none'"
+              style="position:absolute;top:1rem;right:1rem;background:transparent;
+                     border:none;color:#c9a84c;font-size:1.4rem;cursor:pointer;">✕</button>
+      <h2 style="color:#c9a84c;text-align:center;margin:0 0 1.5rem;letter-spacing:2px;">
+        🔑 CHANGER LE MOT DE PASSE
+      </h2>
+      <div id="passwordError" style="display:none;background:rgba(220,60,60,0.15);
+           border:1px solid rgba(220,60,60,0.4);border-radius:8px;
+           padding:0.6rem 1rem;margin-bottom:1rem;color:#ff8080;font-size:0.88rem;">
+      </div>
+      <div class="form-group password-field">
+        <label class="form-label">Mot de passe actuel</label>
+        <div class="password-wrapper">
+          <input id="oldPasswordInput" type="password" class="form-input" placeholder="••••••••"/>
+          <span class="toggle-eye" onclick="togglePassword('oldPasswordInput', this)">
+            <svg class="eye-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+
+            <svg class="eye-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.77 21.77 0 0 1 5.06-5.94"/>
+              <path d="M1 1l22 22"/>
+              <path d="M9.53 9.53a3 3 0 0 0 4.24 4.24"/>
+              <path d="M14.47 14.47A3 3 0 0 0 9.53 9.53"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+      <div class="form-group password-field" style="margin-top:0.8rem;">
+        <label class="form-label">Nouveau mot de passe</label>
+        <div class="password-wrapper">
+          <input id="newPasswordInput" type="password" class="form-input"
+                 placeholder="minimum 6 caractères" minlength="6"/>
+          <span class="toggle-eye" onclick="togglePassword('newPasswordInput', this)">
+            <svg class="eye-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+
+            <svg class="eye-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.77 21.77 0 0 1 5.06-5.94"/>
+              <path d="M1 1l22 22"/>
+              <path d="M9.53 9.53a3 3 0 0 0 4.24 4.24"/>
+              <path d="M14.47 14.47A3 3 0 0 0 9.53 9.53"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+      <div class="form-group password-field">
+        <label class="form-label">Confirmer</label>
+        <div class="password-wrapper">
+          <input id="confirmPasswordInput" type="password" class="form-input" placeholder="••••••••"/>
+          <span class="toggle-eye" onclick="togglePassword('confirmPasswordInput', this)">
+            <svg class="eye-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+
+            <svg class="eye-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a21.77 21.77 0 0 1 5.06-5.94"/>
+              <path d="M1 1l22 22"/>
+              <path d="M9.53 9.53a3 3 0 0 0 4.24 4.24"/>
+              <path d="M14.47 14.47A3 3 0 0 0 9.53 9.53"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+      <button onclick="submitChangePassword(this)" class="btn btn-primary" style="width:100%;margin-top:1rem;">
+        Confirmer ✦
+      </button>
+    </div>
+  </div>
+
   <th:block th:replace="~{fragments/scripts :: scripts}"></th:block>
   <script>
+    /*<![CDATA[*/
     // Thème sélectionné par défaut
     let currentTheme = 'theme1';
 
-    // Récupérer le context path via Thymeleaf
-    const CTX = /*[[@{/}]]*/ '/';
+    // Données injectées par Thymeleaf
+    const CTX_PATH   = /*[[@{/}]]*/ '/';  
+    const RAW_BOARD   = /*[[${board}]]*/ [];
+    const BOARD = RAW_BOARD.map(p => {
+        if (p.startsWith('http') || p.startsWith(CTX_PATH)) return p;
+        return CTX_PATH + p;
+    });
 
     function setThemeBackground(theme) {
       document.body.className = theme;
-      document.body.style.setProperty('--theme-bg', `url(${CTX}backgrounds/${theme}.jpg)`);
+      document.body.style.setProperty('--theme-bg', `url(${CTX_PATH}backgrounds/${theme}.jpg)`);
     }
 
     function selectTheme(theme) {
@@ -181,13 +406,14 @@
       ['1','2','3'].forEach(lvl => {
         const link = document.getElementById('link-' + lvl);
         if (link) {
-          link.href = `${CTX}game/start/${lvl}?theme=${theme}`;
+          link.href = `${CTX_PATH}game/start/${lvl}?theme=${theme}`;
         }
       });
     }
 
     // Initialiser le background au chargement
-    setThemeBackground(currentTheme);
+    setThemeBackground(currentTheme); 
+    /*]]>*/
   </script>
 </body>
 </html>
